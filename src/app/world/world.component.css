@@ -1,0 +1,10 @@
+.butt {  border: none;
+    background-color: transparent;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-block;
+    }
+
+.default {color: white;}
+.black {color: black;}

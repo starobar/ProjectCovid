@@ -1,0 +1,314 @@
+
+  <head>
+    <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    
+    th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 10px;
+    }
+
+    td {
+      border: 1px solid #dddddd;
+      text-align: right;
+      padding: 8px;
+    }
+
+    table.center {
+      margin-left: auto; 
+      margin-right: auto;
+     }
+    </style>
+  </head>
+
+    <body>
+      <div class="text-center">
+        <h1> 
+        <img 
+          style = "width: 5%"
+          src="https://firebasestorage.googleapis.com/v0/b/projectcovid-d9ab2.appspot.com/o/ProjectCovid_icon.png?alt=media&token=b82cfa5a-2cb4-48cd-aa20-cf3ff0db15c5" 
+          alt="Covid icon"/>  COVID-19</h1>
+        <p style="font-size: 2vw;"> Live Updates and Statistics</p>
+      </div>
+
+      <div>
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th>Corona Virus Summary Worldwide</th>
+          </tr>
+        </table>
+      </div>
+
+      <div class = "mt-3" *ngIf="summaryData">
+        <table class="center">
+          <tr style="background-color:rgb(240, 228, 253)">
+            <th>Total Cases</th>
+            <td>{{summaryData?.Global?.TotalConfirmed | number}}</td>
+          </tr>
+          <tr style="background-color:rgb(240, 228, 253)">
+            <th>New Cases</th>
+            <td>{{summaryData?.Global?.NewConfirmed | number}}</td>
+          </tr>
+          <tr style="background-color:rgb(240, 228, 253)">
+            <th>Active Cases</th>
+            <td>{{active_cases | number}}</td>
+          </tr>
+          <tr style="background-color:rgb(212, 197, 231)">
+            <th>Total recovered</th>
+            <td>{{summaryData?.Global?.TotalRecovered | number}}</td>
+          </tr>
+          <tr style="background-color:rgb(212, 197, 231)">
+            <th>New Recovered</th>
+            <td>{{summaryData?.Global?.NewRecovered | number}}</td>
+          </tr>
+          <tr style="background-color:rgb(212, 197, 231)">  
+            <th>Recovery Rate</th>
+            <td>{{recovery_rate}}%</td>
+          </tr>
+          <tr style="background-color:rgba(143, 112, 194, 0.747)">
+            <th>Total Deaths</th>
+            <td>{{summaryData?.Global?.TotalDeaths | number}}</td>
+          </tr>
+          <tr style="background-color:rgba(143, 112, 194, 0.747)">  
+            <th>New Deaths</th>
+            <td>{{summaryData?.Global?.NewDeaths | number}}</td>
+          </tr>
+          <tr style="background-color:rgba(143, 112, 194, 0.747)"> 
+            <th>Mortality Rate</th>
+            <td>{{mortality_rate}}%</td>
+          </tr>
+        </table>
+      </div>
+    
+      <div class = "mt-3">
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th>Corona Virus Cases Distribution Worldwide</th>
+          </tr>
+        </table>
+      </div>
+
+<!-- ################PIE CHART######################################################## -->
+
+      <div class = "mt-3" >
+        <div *ngIf="summaryData">
+          <div class="chart">
+            <canvas baseChart
+              [data]="pieChartData"
+              [labels]="pieChartLabels"
+              [chartType]="pieChartType"
+              [options]="pieChartOptions"
+              [plugins]="pieChartPlugins"
+              [colors]="pieChartColors"
+              [legend]="pieChartLegend">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class = "mt-3">
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th>Daily Corona Virus Cases Worldwide</th>
+          </tr>
+        </table>
+      </div>
+
+<!-- ################BAR CHART######################################################## -->
+
+      <div style="display: block"
+           class = "mt-3" *ngIf="world">
+        <canvas baseChart
+          [datasets]="barChartData"
+          [labels]="barChartLabels"
+          [options]="barChartOptions"
+          [plugins]="barChartPlugins"
+          [legend]="barChartLegend"
+          [chartType]="barChartType"
+          [colors]="barChartColors">
+        </canvas>
+      </div>
+
+      <div class = "mt-3">
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th>Total Corona Virus Cases Worldwide</th>
+          </tr>
+        </table>
+      </div>
+
+
+      <!-- ################LINE CHART######################################################## -->
+
+      <div class="flex-item">
+        <div style="display: block;" *ngIf="world">
+          <canvas baseChart 
+            [datasets]="lineChartData"
+            [labels]="lineChartLabels"
+            
+            [colors]="lineChartColors"
+            [legend]="lineChartLegend"
+            [chartType]="lineChartType"
+            [plugins]="lineChartPlugins">
+        </canvas>
+        <!-- [options]="lineChartOptions" -->
+        </div>
+      </div>
+
+<!-- ###############News section############################################################################## -->
+
+      <div class = "mt-3">
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th>Worldwide Corona Virus News</th>
+          </tr>
+        </table>
+      </div>
+    
+
+
+    <!-- <div class = "mt-3">
+      Signed in as {{ user.displayName }}
+    </div> -->
+  
+    
+    <div *ngIf="serviceFetch.userSignedIn()">
+      
+      <div class = "mt-3">
+        <div class="row">
+          <div class="col-sm-6">
+            <p>Logged as {{user.displayName}}</p>
+          </div>
+          <div class="col-sm-6 text-right">
+            <button class="btn btn-danger" (click)="serviceFetch.signOut()">Log Out</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div *ngIf="!serviceFetch.userSignedIn()">
+      
+      <div class = "mt-3">
+        <div class="row">
+          <div class="col-sm-6">
+            <p>Sign in to add news</p>
+          </div>
+          <div class="col-sm-6 text-right">
+            <button class="btn btn-info" (click)="serviceFetch.signInWithGoogle()">Sign in with Google</button>
+          </div>
+        </div>
+      </div>
+
+      <app-add-news></app-add-news>
+
+    </div>
+
+
+    
+
+<!-- 
+      <form (ngSubmit)="addNews()">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <select name="selectCountry"
+                [(ngModel)] ="selectedCountry"
+                required>
+                    <option *ngFor="let country of countries" [ngValue]="country">{{ country.Country }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-12">
+                <label for="descriptionInput">Description</label>
+                <input type="text" id="descriptionInput" name="descriptionInput" class="form-control" placeholder="Enter your news."
+                [(ngModel)]="description"
+                required
+                />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add</button>
+    </form> -->
+
+<!-- ###############Table of countries############################################################################## -->
+
+      <div class = "mt-3">
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th>Corona Virus Cases by Country</th>
+          </tr>
+        </table>
+      </div>
+
+
+      <div class = "mt-3" *ngIf="summaryData">
+        <table class = "center" id="myTable">
+          <thead>
+            <tr>
+              <th style = "text-align: center; background-color:rgba(80, 76, 69, 0.856);color:white">
+                <button (click) = "countryService.sortTable(0)" class="butt default"> Country &#9650;</button>
+              </th>
+              <th style = "text-align: center;background-color:rgb(240, 228, 253)" (click) = "countryService.sortTable(1)">
+                <button (click) = "countryService.sortTable(0)" class="butt black"> New Cases &#9650;</button>
+              </th>
+              <th style = "text-align: center;background-color:rgb(240, 228, 253)" (click) = "countryService.sortTable(2)">
+                <button (click) = "countryService.sortTable(0)" class="butt black"> Total Cases &#9650;</button>
+              </th>
+              <th style = "text-align: center;background-color:rgb(212, 197, 231)" (click) = "countryService.sortTable(3)">
+                <button (click) = "countryService.sortTable(0)" class="butt black"> New Recoveries &#9650;</button>
+              </th>
+              <th style = "text-align: center; background-color:rgb(212, 197, 231)" (click) = "countryService.sortTable(4)">
+                <button (click) = "countryService.sortTable(0)" class="butt black"> Total Recoveries &#9650;</button>
+              </th>
+              <th style = "text-align: center;background-color:rgba(143, 112, 194, 0.747)" (click) = "countryService.sortTable(5)">
+                <button (click) = "countryService.sortTable(0)" class="butt black"> New Deaths &#9650;</button>
+              </th>
+              <th style = "text-align: center;background-color:rgba(143, 112, 194, 0.747)" (click) = "countryService.sortTable(6)">
+                <button (click) = "countryService.sortTable(0)" class="butt black"> Total Deaths &#9650;</button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let CountryData of summaryData.Countries">
+              <td style = "text-align: center; background-color:rgba(80, 76, 69, 0.856);color:white"
+                  >
+                  <button (click) = "countryService.goToCountry(CountryData.Slug)" class="butt default">{{CountryData.Country}}</button>
+              </td>
+              <td style = "text-align: center;background-color:rgb(240, 228, 253)">
+                {{CountryData.NewConfirmed}}
+              </td>
+              <td style = "text-align: center;background-color:rgb(240, 228, 253)">
+                {{CountryData.TotalConfirmed}}
+              </td>
+              <td style = "text-align: center;background-color:rgb(212, 197, 231)">
+                {{CountryData.NewRecovered}}
+              </td>
+              <td style = "text-align: center; background-color:rgb(212, 197, 231)">
+                {{CountryData.TotalRecovered}}
+              </td>
+              <td style = "text-align: center;background-color:rgba(143, 112, 194, 0.747)">
+                {{CountryData.NewDeaths}}
+              </td>
+              <td style = "text-align: center;background-color:rgba(143, 112, 194, 0.747)">
+                {{CountryData.TotalDeaths}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+
+      <div class = "mt-3">
+        <table class = "center">
+          <tr style="background-color:rgba(179, 150, 97, 0.267)">
+            <th style = "text-align: center">Data Source: <a href="https://covid19api.com/">COVID-19 API / Johns Hopkins CSSE</a></th>
+          </tr>
+        </table>
+      </div>
+  
+<body>
