@@ -35,7 +35,7 @@
     </div>
 
     <div class = "mt-3, text-center" *ngIf = "specCountry">
-      <b><a href="worldwide">Worldwide</a> > {{specCountry.Country}}</b>
+      <b><a href="">Worldwide</a> > {{specCountry.Country}}</b>
     </div>
 
     <div class = "mt-3" *ngIf = "specCountry">
@@ -162,6 +162,40 @@
       </div>
     </div>
 
+        <!-- ###############News section############################################################################## -->
+
+        <div class = "mt-3" *ngIf = "specCountry">
+          <table class = "center">
+            <tr style="background-color:rgba(179, 150, 97, 0.267)">
+              <th>{{specCountry.Country}} Corona Virus News</th>
+            </tr>
+          </table>
+        </div>
+
+        <div class="my-3" *ngIf="news && news.length > 0">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>User</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let new of news">
+                 <td>{{ new.date.toDate() | date}}</td>
+                <td>{{ new.description }}</td>
+                <td>{{ new.username }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="my-3" *ngIf="news && news.length == 0">
+          No news available.
+        </div>
+        
+
     <div class = "mt-3">
       <table class = "center">
         <tr style="background-color:rgba(179, 150, 97, 0.267)">
@@ -169,3 +203,4 @@
         </tr>
       </table>
     </div>
+

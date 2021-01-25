@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
 import {ActivatedRoute} from "@angular/router";
 import { AngularFirestore } from '@angular/fire/firestore'
 import * as moment from 'moment';
+import { User } from '../user.model';
+import { News } from '../news.model';
 
 @Component({
   selector: 'app-country',
@@ -62,11 +64,6 @@ public pieChartColors = [
 
 public lineChartData: ChartDataSets[];
 public lineChartLabels: Label[];
-
-// public lineChartOptions: (ChartOptions & { annotation: any }) = {
-// responsive: true,
-// };
-
 public lineChartColors: Color[] = [
 {
   backgroundColor: 'rgb(240, 228, 253)',
@@ -121,7 +118,9 @@ countryTotalConfirmed: Array<number> = [];
 countryTotalRecovered: Array<number> = [];
 countryTotalDate: Array<string> = [];
 
-constructor(private serviceFetch: FetchDataService, private datePipe: DatePipe, public countryService: CountryService, public router:Router, private route: ActivatedRoute,
+news: News[];
+
+constructor(public serviceFetch: FetchDataService, private datePipe: DatePipe, public countryService: CountryService, public router:Router, private route: ActivatedRoute,
             private firestore: AngularFirestore) { 
 
   monkeyPatchChartJsTooltip(); // pie chart
@@ -129,10 +128,19 @@ constructor(private serviceFetch: FetchDataService, private datePipe: DatePipe, 
   this.specCountry = new CountryData;
 }
 
-ngOnInit() {
+ngOnInit(): void {
+  if (this.route.snapshot.params.slug=="worldwide"){
+    this.router.navigate([""]);
+  }
+
   let date = new Date(); //.getUTCDate
   this.currentDate = this.datePipe.transform(date,'yyyy-MM-dd');
+  
   this.getAllCountryData(this.route.snapshot.params.slug);
+  this.countryService.getCountryNews(this.route.snapshot.params.slug)
+  .subscribe((news)=>{
+    this.news = news as News[];
+  });
 
 }
 
@@ -146,7 +154,7 @@ ngOnInit() {
         this.lastUpdate = country.get("Date").substring(0,10); //check the date
 
         if(this.lastUpdate==this.currentDate){ //get data from database
-          console.log('getting summary country data from database')
+          //console.log('getting summary country data from database')
             this.specCountry.Country = country.get("Country");
             this.specCountry.Date = country.get("Date"),
             this.specCountry.Slug = country.get("Slug"),
@@ -169,7 +177,7 @@ ngOnInit() {
               this.updateCountryData(this.specCountry);
               this.getCountryRates();
               this.pieChartData = [this.specCountry.TotalDeaths, this.specCountry.TotalRecovered, this.country_active_cases]
-              console.log('updating summary country data in database');
+              //console.log('updating summary country data in database');
             }
           )
         }
@@ -183,7 +191,7 @@ ngOnInit() {
             this.updateCountryData(this.specCountry);
             this.getCountryRates();
             this.pieChartData = [this.specCountry.TotalDeaths, this.specCountry.TotalRecovered, this.country_active_cases]
-            console.log('loading data from API, no doc in database for this country');
+            //console.log('loading data from API, no doc in database for this country');
           }
         )
       }
@@ -193,7 +201,6 @@ ngOnInit() {
     this.serviceFetch.getCountry("https://api.covid19api.com/total/dayone/country/"+countryName).subscribe( //get total country data for specific country
       response => {
         this.country = response;
-        console.log('getting country data for Bar and Line charts');
         var len =  this.country.length;
 
 /////////////////////////////////////////BAR and LINE CHART DATA//////////////////////////////////////////////////////////////////////////////////////

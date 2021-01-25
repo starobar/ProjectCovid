@@ -2,12 +2,14 @@ import { Component, OnInit} from '@angular/core';
 
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import { SingleDataSet, Label, monkeyPatchChartJsLegend, monkeyPatchChartJsTooltip, Color} from 'ng2-charts';
-import { SummaryData, WorldDayData } from '../country.model';
+import { CountryData, SummaryData, WorldDayData } from '../country.model';
 import { DatePipe } from '@angular/common'; 
 import { FetchDataService } from '../fetch-data.service';
 import {CountryService} from '../country.service';
 import { Router } from '@angular/router';
 import { User } from '../user.model';
+import { News } from '../news.model';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 
 @Component({
@@ -61,11 +63,6 @@ export class WorldComponent implements OnInit {
 
 public lineChartData: ChartDataSets[];
 public lineChartLabels: Label[];
-
-// public lineChartOptions: (ChartOptions & { annotation: any }) = {
-// responsive: true,
-// };
-
 public lineChartColors: Color[] = [
   {
     backgroundColor: 'rgb(240, 228, 253)',
@@ -105,6 +102,7 @@ public lineChartPlugins: any = [];
   mortality_rate: number | undefined;
   currentDate: string;
   world: WorldDayData[];
+  countries: Array<CountryData> = [];
 
   worldTotalDeaths: Array<number> = [];
   worldTotalRecovered: Array<number> = [];
@@ -113,10 +111,20 @@ public lineChartPlugins: any = [];
   worldDailyRecovered: Array<number> = [];
   worldDailyConfirmed: Array<number> = [];
 
+  section: string;
+  countryName: string;
+  username: string;
+  description: string;
+  date: any;
+
   user: User;
+  selectedCountry: CountryData;
+  userInfo: User;
+
+  news: News[];
 
 
-  constructor(public serviceFetch: FetchDataService, private datePipe: DatePipe, public countryService: CountryService, public router:Router) { 
+  constructor(public serviceFetch: FetchDataService, private datePipe: DatePipe, public countryService: CountryService, public router:Router, private firestore : AngularFirestore) { 
 
     monkeyPatchChartJsTooltip(); // pie chart
     monkeyPatchChartJsLegend(); // pie chart
@@ -124,22 +132,31 @@ public lineChartPlugins: any = [];
   }
 
 
-  public listItems: Array<string> = ['Baseball', 'Basketball', 'Cricket', 'Field Hockey', 'Football', 'Table Tennis', 'Tennis', 'Volleyball'];
-
-  ngOnInit() {
+  async ngOnInit() {
 
     this.getAllData();
-    this.user = this.serviceFetch.getUser();
+
+    if(this.user == null && this.serviceFetch.userSignedIn()){
+      this.user = JSON.parse(localStorage.getItem("user"));
+      this.firestore.collection("Users").doc(this.user.uid).get().subscribe((user)=>{
+            if(user.exists){
+              this.user.admin = user.get("admin");
+          }  
+          });
+    }
+
+    this.serviceFetch.getGlobalNews()
+    .subscribe((news)=>{
+      this.news = news as News[];
+    });
+    
   }
 
   getAllData() {
 
-    let date = new Date(); //.getUTCDate
-    this.currentDate = date.toISOString().substring(0,19)+'Z'; //probably working also without substring and Z
-    
+    let date = new Date();
+    this.currentDate = date.toISOString().substring(0,19)+'Z';
     let startDate = new Date("2020-04-13");
-    console.log('date', date, startDate);
-
     var dates: any[] = [];
 
     while( startDate <  date){
@@ -147,23 +164,19 @@ public lineChartPlugins: any = [];
       startDate.setDate(startDate.getDate() + 1);
     }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
     this.serviceFetch.getSummary().subscribe(
       response => {
         this.summaryData = response;
         this.getRates();
         this.pieChartData = [this.summaryData?.Global?.TotalDeaths, this.summaryData?.Global?.TotalRecovered, this.active_cases]
+        this.countries = this.summaryData.Countries;
       }
     )
 
     this.serviceFetch.getWorld("https://api.covid19api.com/world?from=2020-04-13T00:00:00Z&to="+this.currentDate).subscribe( //get total country data for specific country
       response => {
         this.world = response;
-        //this.world.forEach(function(value) {console.log(value.TotalConfirmed)});
+        
         this.makeWorldLists(this.world, this.worldTotalDeaths, this.worldTotalRecovered, this.worldTotalConfirmed);
 
         var len =  this.worldTotalDeaths.length;
@@ -233,6 +246,22 @@ public lineChartPlugins: any = [];
     TotalRecovered.push(storeTotalRecovered);
     TotalConfirmed.push(storeTotalConfirmed);
     });
+  }
+
+  addNews(){
+    let news: News = {
+      section: this.selectedCountry.Slug,
+      countryName: this.selectedCountry.Country,
+      username: this.user.displayName,
+      description: this.description,
+      date: new Date()
+    };
+    this.serviceFetch.addNews(news);
+    this.section = undefined;
+    this.countryName = undefined;
+    this.username = undefined;
+    this.description = undefined;
+    this.date = undefined;
   }
 
 }

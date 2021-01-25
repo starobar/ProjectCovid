@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { SummaryData } from './country.model';
+
 import { CountryComponent } from './country/country.component';
 import { WorldComponent } from './world/world.component';
 

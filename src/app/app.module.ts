@@ -13,15 +13,15 @@ import { AppComponent } from './app.component';
 import { environment } from 'src/environments/environment';
 import { WorldComponent } from './world/world.component';
 import { CountryComponent } from './country/country.component';
-import { AddNewsComponent } from './add-news/add-news.component';
 import { FormsModule } from '@angular/forms';
+import { SortDirective } from './sort/sort.dir';
 
 @NgModule({
   declarations: [
     AppComponent,
     WorldComponent,
     CountryComponent,
-    AddNewsComponent
+    SortDirective
   ],
   imports: [
     BrowserModule,
